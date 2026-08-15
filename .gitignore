@@ -13,6 +13,6 @@ models/
 !.dsh/.agent-presets/**
 *.log
 node_modules/
-dist-electron/
+dist-electron*/
 .electron-runtime/
 vendor/
