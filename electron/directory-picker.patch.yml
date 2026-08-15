@@ -1,0 +1,12 @@
+# Electron owns the visible desktop window while the Harness server runs in a
+# background Node process. Pin the documented in-app browser interaction so a
+# workspace chooser cannot appear behind the Electron window.
+- id: directory-picker
+  disabled: true
+
+- insert:
+    - id: directory-picker-backend
+      name: '@deepseek-ai/dsh-host-directory-picker-browse'
+
+    - id: directory-picker-surface
+      name: '@deepseek-ai/dsh-client-ui-directory-picker-browse'

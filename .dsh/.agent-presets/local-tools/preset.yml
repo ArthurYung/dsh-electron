@@ -1,0 +1,3 @@
+name: Windows 工具助手
+description: 基于 DeepSeek API 的 Windows Agent，支持文件、PowerShell、搜索、任务清单与原生 Computer Use。
+order: 0

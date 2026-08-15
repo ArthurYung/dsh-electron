@@ -1,0 +1,76 @@
+{
+  "name": "dsh-electron",
+  "private": true,
+  "version": "0.1.2",
+  "description": "DeepSeek Harness runtime using the official DeepSeek API",
+  "author": "Bruce",
+  "main": "electron/main.mjs",
+  "scripts": {
+    "harness": "dsh web",
+    "predesktop": "node scripts/prepare-electron-runtime.mjs",
+    "desktop": "electron .",
+    "predesktop:pack": "node scripts/prepare-electron-runtime.mjs",
+    "desktop:pack": "electron-builder --win dir",
+    "predesktop:build": "node scripts/prepare-electron-runtime.mjs",
+    "desktop:build": "electron-builder --win nsis",
+    "test": "node --test tests/computer-use.test.mjs tests/harness-service.test.mjs tests/directory-picker-patch.test.mjs tests/packaged-preset.test.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.1.0-rc.6"
+  },
+  "allowScripts": {
+    "@deepseek-ai/dsh-subprocess-local@0.1.0-rc.6": true,
+    "node-pty@1.1.0": true,
+    "koffi@3.1.4": true,
+    "protobufjs@7.6.5": true
+  },
+  "build": {
+    "appId": "ai.deepseek.harness.desktop",
+    "productName": "DeepSeek Harness",
+    "asar": false,
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".dsh/settings.yaml",
+        "to": "harness-defaults/settings.yaml"
+      },
+      {
+        "from": ".dsh/.agent-presets",
+        "to": "harness-defaults/.agent-presets"
+      },
+      {
+        "from": ".electron-runtime",
+        "to": "node-runtime"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "DeepSeek-Harness-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3"
+  }
+}

@@ -1,0 +1,25 @@
+[project]
+name = "local-llama-runner"
+version = "0.1.0"
+description = "Run a local GGUF language model with llama.cpp"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "llama-cpp-python>=0.3.16,<1",
+  "nvidia-cublas-cu12>=12.4; sys_platform == 'win32'",
+  "nvidia-cuda-runtime-cu12>=12.4; sys_platform == 'win32'",
+  "pydantic-settings>=2.7,<3",
+  "uvicorn[standard]>=0.34,<1",
+]
+
+[project.scripts]
+llama-chat = "local_llm.cli:main"
+llama-api = "local_llm.api:main"
+llama-agent = "local_llm.agent:main"
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["local_llm*"]

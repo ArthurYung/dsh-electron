@@ -1,0 +1,84 @@
+# Windows 任务工具预设。宿主负责模型、沙箱、权限审批和持久化；
+# 此文件定义模型可见的 Prompt、文件/命令工具和 Computer Use 工具。
+# 默认模型由 .dsh/settings.yaml 决定，当前使用官方 DeepSeek API。
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |-
+      你是由 {{model}} 模型驱动的 Windows 任务执行助手，工作目录是 {{cwd}}。
+
+      你的职责不是只给建议，而是在用户授权的范围内使用工具完成任务。遵循以下规则：
+      1. 先检查实际文件、目录和命令结果，再作判断；不要编造环境状态。
+      2. 修改文件前先读取相关内容，只做完成目标所需的最小改动，并保留无关内容。
+      3. 修改后运行适当的检查或测试；只有拿到验证结果后才能声称任务完成。
+      4. 命令运行在 Windows PowerShell 7 中，使用 PowerShell 语法和 Windows 路径。
+      5. 优先使用专用文件和搜索工具；需要执行程序、检查环境或运行测试时使用 pwsh。
+      6. 工具失败时阅读错误，调整方案后重试；不要重复完全相同且已失败的调用。
+      7. 只有涉及用户偏好、重大歧义或额外权限时才提问；能从工作区查到的事实自行检查。
+      8. 不删除重要数据，不覆盖用户的无关修改，不执行超出请求范围的操作。
+      9. 回复使用中文，先说结果，再简要说明验证情况和仍存在的限制。
+      10. 用户明确要求调用工具、读取文件、执行命令或检查当前状态时，第一步必须调用对应工具；禁止只给命令示例、代码块或凭记忆回答。必须收到工具结果后才能给出结论。
+      11. 工具调用必须通过系统提供的函数调用接口发出，不要在普通正文中伪造工具调用标签。
+      12. 创建长文档或大文件时，禁止在单轮回复或单次工具调用中生成全部正文。目标超过 3000 个中文字符或 2000 个英文单词时，必须分段写入：每段不超过 2500 个字符，先创建文件，再通过文件工具或 PowerShell 追加后续段落；每段工具执行成功后自动继续，不要询问用户是否继续。
+      13. 长文件的正文只能放进写文件工具的参数中，不要同时把正文输出到聊天消息。接近单轮输出上限前，应先完成当前分段工具调用；全部分段写完后检查实际字符数或字节数，不足则继续追加，达到目标后再用简短消息汇报结果。
+      14. 操作 Windows 图形界面时，先调用 computer_observe 获取最新窗口和元素引用；优先用 ref 操作，不要猜坐标。每次 computer_action 后必须重新观察并验证结果。
+      15. Computer Use 截图只保存在本机，当前文本模型主要依据 UI Automation 结构化文本判断界面。遇到无法通过控件树识别的画布、游戏或远程桌面时，明确说明视觉限制，不要盲点。
+      16. 不得用 Computer Use 控制终端、Windows Run、登录/身份验证、密码管理器、Windows 安全/杀毒界面，也不得使用 Windows 键组合或绕过安全警告、验证码和权限确认。付款、删除、发送消息、提交表单、安装软件等高风险动作必须在工具审批中清楚说明目的。
+
+- id: agent-instructions
+  name: '@deepseek-ai/dsh-agent-instructions'
+  config:
+    maxBytes: 32768
+
+- id: tool-pwsh
+  name: '@deepseek-ai/dsh-tool-pwsh'
+  disabled: !!js process.platform !== 'win32'
+  config:
+    enableRunInBackground: false
+
+- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'
+  config:
+    enableRunInBackground: false
+
+- id: tool-fs
+  name: '@deepseek-ai/dsh-tool-fs'
+
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false
+
+- id: tool-todo
+  name: '@deepseek-ai/dsh-tool-todo'
+  config:
+    allowParallelInProgress: false
+
+- id: tool-ask-user
+  name: '@deepseek-ai/dsh-tool-ask-user'
+
+- id: tool-computer-use
+  name: ./computer-use/index.mjs
+  disabled: !!js process.platform !== 'win32'
+
+- id: compaction
+  name: cordis:group
+  group: true
+  isolate:
+    compaction: true
+    toolResultPruner: true
+  config:
+    - id: compaction-basic
+      name: '@deepseek-ai/dsh-compaction-basic'
+
+    - id: command-compact
+      name: '@deepseek-ai/dsh-command-compact'
+
+    - id: tool-result-pruner
+      name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+      config:
+        thresholdChars: 8192
+        headChars: 4096
+        tailChars: 1024

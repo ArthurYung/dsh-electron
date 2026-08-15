@@ -1,0 +1,9 @@
+agent-default-model:
+  provider: deepseek-official
+  model: deepseek-v4-flash
+  reasoningEffort: high
+
+agent-presets:
+  default: local-tools
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
