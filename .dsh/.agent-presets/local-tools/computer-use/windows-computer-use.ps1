@@ -321,7 +321,10 @@ function Invoke-Observe($payload) {
             className = [string]$window.Current.ClassName
             bounds = Convert-Bounds $window.Current.BoundingRectangle
         }
-        elements = @($elements)
+        # Windows PowerShell 5.1 throws "Argument types do not match" when a
+        # Generic.List[object] is wrapped in @(...). Convert it explicitly so
+        # observation works on the PowerShell version bundled with Windows.
+        elements = $elements.ToArray()
     }
     if ([bool]$payload.includeScreenshot) {
         Save-WindowScreenshot ([IntPtr]$windowHandle) ([string]$payload.screenshotPath)

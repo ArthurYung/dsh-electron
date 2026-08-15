@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import { fileURLToPath } from 'node:url'
 
 import { apply } from '../.dsh/.agent-presets/local-tools/computer-use/index.mjs'
+
+const powershellScript = fileURLToPath(new URL(
+  '../.dsh/.agent-presets/local-tools/computer-use/windows-computer-use.ps1',
+  import.meta.url,
+))
 
 function loadPlugin() {
   const tools = []
@@ -58,4 +65,10 @@ test('an action cannot run without a prior observation', async () => {
     ),
     /computer_observe/,
   )
+})
+
+test('PowerShell 5.1 observation converts the generic element list explicitly', async () => {
+  const source = await readFile(powershellScript, 'utf8')
+  assert.match(source, /elements\s*=\s*\$elements\.ToArray\(\)/)
+  assert.doesNotMatch(source, /elements\s*=\s*@\(\$elements\)/)
 })
